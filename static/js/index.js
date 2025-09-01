@@ -38,8 +38,62 @@ $(document).ready(function() {
 			autoplaySpeed: 3000,
     }
 
-		// Initialize all div with carousel class
-    var carousels = bulmaCarousel.attach('.carousel', options);
+    var videoOptions = {
+			slidesToScroll: 1,
+			slidesToShow: 3,
+			loop: true,
+			infinite: true,
+			autoplay: true,
+			autoplaySpeed: 4000,
+    }
+
+    var singleOptions = {
+        slidesToScroll: 1,
+        slidesToShow: 1,
+        loop: true,
+        infinite: true,
+        autoplay: true,
+        autoplaySpeed: 3000,
+    }
+
+		// Initialize all div with carousel class except specific ones
+    var carousels = bulmaCarousel.attach('.carousel:not(#manipulation-carousel):not(#hammer-carousel):not(#knife-carousel):not(#mugtree-carousel):not(#pour-carousel):not(#toaster-carousel)', options);
+    
+    // Initialize manipulation carousel with multiple show options
+    var videoCarousel;
+    try {
+        videoCarousel = bulmaCarousel.attach('#manipulation-carousel', videoOptions);
+    } catch(e) {
+        console.log('Video carousel initialization failed:', e);
+        // Fallback - try with simpler options
+        var simpleVideoOptions = {
+            slidesToScroll: 1,
+            slidesToShow: 1,
+            loop: false,
+            infinite: false,
+            autoplay: false,
+        };
+        try {
+            videoCarousel = bulmaCarousel.attach('#manipulation-carousel', simpleVideoOptions);
+        } catch(e2) {
+            console.log('Simple video carousel initialization also failed:', e2);
+        }
+    }
+    
+    // Initialize individual task carousels (one GIF at a time)
+    var taskCarousels = [];
+    var taskIds = ['#hammer-carousel', '#knife-carousel', '#mugtree-carousel', '#pour-carousel', '#toaster-carousel'];
+    
+    taskIds.forEach(function(taskId) {
+        try {
+            var taskCarousel = bulmaCarousel.attach(taskId, singleOptions);
+            if(taskCarousel && taskCarousel.length > 0) {
+                taskCarousels.push(taskCarousel[0]);
+            }
+        } catch(e) {
+            console.log('Task carousel initialization failed for ' + taskId + ':', e);
+        }
+    });
 
     // Loop on each carousel initialized
     for(var i = 0; i < carousels.length; i++) {
@@ -47,6 +101,15 @@ $(document).ready(function() {
     	carousels[i].on('before:show', state => {
     		console.log(state);
     	});
+    }
+    
+    // Handle video carousel events
+    if(videoCarousel && videoCarousel.length > 0) {
+        for(var j = 0; j < videoCarousel.length; j++) {
+            videoCarousel[j].on('before:show', state => {
+                console.log('Video carousel:', state);
+            });
+        }
     }
 
     // Access to bulmaCarousel instance of an element
